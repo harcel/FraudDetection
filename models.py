@@ -380,7 +380,7 @@ def seasonality(data, params, hitlist, outdata):
 	scores = scores[scores.values > 0]
 		
 	outdata['seasonality'] = {}
-	outdata['seasonality']['Provider_ID'] = list(stds.index)
+	outdata['seasonality']['Provider_ID'] = list(scores.index)
 	outdata['seasonality']['Values'] = []
 	outdata['seasonality']['Months'] = []
 	for prov in scores.index: 
@@ -422,9 +422,9 @@ def combination_codes(data, params, hitlist, outdata):
 	score = [p/mednumber for p in ncombis.values]
 	money = [34 * p for p in ncombis.values]
 
-	# Make the monetary loss equal to the rate hor H1: 34.
+	# Make the monetary loss equal to the rate for H1: 34.
 
-	hl_add = pd.DataFrame({'Provider_ID':outliers, 'Score':score, 'Monetary':money, 
+	hl_add = pd.DataFrame({'Provider_ID':ids, 'Score':score, 'Monetary':money, 
 		'Model': ['Combination codes']*len(score), 'Weight':[params['Weight']]*len(score)})
 
 	hitlist = hitlist.append(hl_add)
@@ -574,8 +574,7 @@ def freely_billed(data, params, hitlist, outdata):
 
 def periodic_often(data, params, hitlist, outdata):
 	""" Periodic treatments (code BX) should be done once or twice a year. 
-	Catch providers who have done more than that to some patients. There are no free parameters.
-
+	Catch providers who have done more than that to some patients. 
 	"""
 
 	maxnumber = params['maxnumber']
