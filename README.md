@@ -20,7 +20,7 @@ A list of contents:
 
 The code is in Python 3.6, but shouldn't be too sensitive to versions. It requires numpy, pandas, matplotlib, scikit-learn and (only for one plot) seaborn and altair.
 
-For questions, comments etc. feel free to contact the author here, or on datascience@marcelhaas.com.
+For questions, comments etc. feel free to contact the author here, or at datascience@marcelhaas.com.
 
 Marcel Haas
 
