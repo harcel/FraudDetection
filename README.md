@@ -4,6 +4,8 @@ Fraud is omnipresent and manifests itself in a great variety of ways. Analytics 
 
 ![Fraud Detection](fraud-detection.jpg)
 
+<img src="fraud-detection.jpg" width=100>
+
 ***
 **Disclaimer:** This is by no means a complete working example ready to take into production. Rather, it is meant to demonstrate what kind of models can be used for fraud detection and how they can be combined into a hybrid scheme. 
 
