@@ -132,7 +132,7 @@ def cost_per_member(data, params, hitlist, outdata, grouping='Prov_specialism'):
 	hl_add = pd.DataFrame({'Provider_ID':outliers, 'Score':score, 'Monetary':money, 
 		'Model': ['Costs per patient']*len(score), 'Weight':[params['Weight']]*len(score) })
 
-	hitlist = hitlist.append(hl_add)
+	hitlist = hitlist.append(hl_add, sort=True)
 
 		
 	return hitlist, outdata
@@ -216,7 +216,7 @@ def billing_pattern(data, params, hitlist, outdata):
 	hl_add = pd.DataFrame({'Provider_ID':outliers, 'Score':score, 'Monetary':money, 
 		'Model': ['Billing pattern']*len(score), 'Weight':[params['Weight']]*len(score)})
 
-	hitlist = hitlist.append(hl_add)
+	hitlist = hitlist.append(hl_add, sort=True)
 
 
 
@@ -274,7 +274,7 @@ def weekends_holidays(data, params, hitlist, outdata):
 	hl_add = pd.DataFrame({'Provider_ID':outliers, 'Score':score, 'Monetary':money, 
 		'Model': ['Treatments on holidays and weekends']*len(score), 'Weight':[params['Weight']]*len(score)})
 
-	hitlist = hitlist.append(hl_add)
+	hitlist = hitlist.append(hl_add, sort=True)
 
 
 	return hitlist, outdata
@@ -335,7 +335,7 @@ def rising_revenue(data, params, hitlist, outdata):
 	hl_add = pd.DataFrame({'Provider_ID':stds.index, 'Score':stds.values, 'Monetary':[0]*len(stds), 
 		'Model': ['Rising revenue']*len(stds), 'Weight':[params['Weight']]*len(stds)})
 
-	hitlist = hitlist.append(hl_add)
+	hitlist = hitlist.append(hl_add, sort=True)
 
 
 	return hitlist, outdata
@@ -392,7 +392,7 @@ def seasonality(data, params, hitlist, outdata):
 	hl_add = pd.DataFrame({'Provider_ID':scores.index, 'Score':scores.values, 'Monetary':[0]*len(scores), 
 		'Model': ['Seasonality']*len(scores), 'Weight':[params['Weight']]*len(scores)})
 
-	hitlist = hitlist.append(hl_add)
+	hitlist = hitlist.append(hl_add, sort=True)
 
 
 	return hitlist, outdata
@@ -427,7 +427,7 @@ def combination_codes(data, params, hitlist, outdata):
 	hl_add = pd.DataFrame({'Provider_ID':ids, 'Score':score, 'Monetary':money, 
 		'Model': ['Combination codes']*len(score), 'Weight':[params['Weight']]*len(score)})
 
-	hitlist = hitlist.append(hl_add)
+	hitlist = hitlist.append(hl_add, sort=True)
 
 
 	return hitlist, outdata
@@ -495,13 +495,13 @@ def fraction_expensive(data, params, hitlist, outdata):
 		outliers['score'] = (outliers.frac_exp - limval) / np.median(outliers.frac_exp - limval)
 		if   ratio == 'number': outliers['money'] = np.zeros(len(outliers.score))
 		elif ratio == 'price': outliers['money'] = [(d[0]-limval)*d[1] for d in zip(outliers.frac_exp, outliers.Expensive)]
-		print(outliers)
+
 
 		hl_add = pd.DataFrame({'Provider_ID':outliers.Provider_ID, 'Score':outliers.score, 'Monetary':outliers.money, 
 		        'Model': ['Fraction expensive treatments']*len(outliers.score), 
 		                       'Weight':[params['Weight']]*len(outliers.score)})
 
-		hitlist = hitlist.append(hl_add)
+		hitlist = hitlist.append(hl_add, sort=True)
 
 	return hitlist, outdata
 
@@ -564,7 +564,7 @@ def freely_billed(data, params, hitlist, outdata):
 			    'Model': ['Rate per freely billed procedure']*len(outliers.score), 
 			                   'Weight':[params['Weight']]*len(outliers.score)})
 
-			hitlist = hitlist.append(hl_add)
+			hitlist = hitlist.append(hl_add, sort=True)
 
 	return hitlist, outdata
 
@@ -599,7 +599,7 @@ def periodic_often(data, params, hitlist, outdata):
 		'Model': ['Periodic treatment too often']*len(scores), 
        	'Weight':[params['Weight']]*len(scores)})
 
-	hitlist = hitlist.append(hl_add)
+	hitlist = hitlist.append(hl_add, sort=True)
 
 	return hitlist, outdata
 
