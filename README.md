@@ -2,7 +2,7 @@
 
 Fraud is omnipresent and manifests itself in a great variety of ways. Analytics is a modern branch of computational methodology that has great promises in the detection of fraudulent behavior, even if one does not yet know how the fraud is committed and hence how it should show. By combining various techniques to look at billing data from any angle imaginable, a thorough detection algorithm can be implemented. A prototype is developed here, based on a mock data set to showcase the type of models that can be implemented and how to combine these in a hybrid detection algorithm. The small working demo of a possible fraud detection algorithm here is designed to catch fraud by service providers such as healthcare providers. *All data is fictional.* For a longer description of the project, see below.
 
-![alt text](https://github.com/harcel/FraudDetection/blob/master/fraud-detection.jpg)
+![Fraud Detection](fraud-detection.jpg)
 
 ***
 **Disclaimer:** This is by no means a complete working example ready to take into production. Rather, it is meant to demonstrate what kind of models can be used for fraud detection and how they can be combined into a hybrid scheme. 
