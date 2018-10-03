@@ -14,21 +14,21 @@ rn.seed(42)
 
 ######################################################################
 
-def cost_per_member(data, params, hitlist, outdata, grouping='Prov_specialism'):
+def cost_per_member(data, params, hitlist):
 	"""
 	This model compares the cost per member.
 
-	There are three options for the grouping of providers:
+	There are three options for the grouping of providers, as defined in params['Grouping']:
 	- Overall (not advised)
 	- By known specialism, indicated by column with the grouping keyword, default='Prov_specialism'
 	- By determined specialism. The model "billing_pattern" will be run in clustering mode
 	
-	For determining outliers there are also three options:
+	For determining outliers there are also three options, as defined in params['Outlier definition']:
 	- Above 90th percentile
 	- Above 95th percentile
 	- Statistical outlier (upper limit = Q3 + 1.5 (Q3-Q1))
 
-	A version of the hitlist with the new results appended is returned
+	A version of the hitlist with the new results appended is returned.
 
 	"""
 
@@ -73,9 +73,6 @@ def cost_per_member(data, params, hitlist, outdata, grouping='Prov_specialism'):
 	score = []
 	money = []
 
-	# Definitions outdata
-	outdata['costs'] = {'cost_per_member':[], 'Provider_ID':[], 'reference_group':[]}
-
 	# plt.subplots_adjust(hspace=0.000)
 	number_of_subplots=len(refgroups)
 
@@ -108,15 +105,6 @@ def cost_per_member(data, params, hitlist, outdata, grouping='Prov_specialism'):
 		    limval = np.percentile(cost_per_member, 90)
 
 		median = np.median(cost_per_member)
-		outdata['costs']['Provider_ID'].extend(list(cost_per_member.index))
-		outdata['costs']['cost_per_member'].extend(list(cost_per_member.values))
-		outdata['costs']['reference_group'].extend([ref]*len(cost_per_member))
-		
-
-
-		# ylims = ax.get_ylim()
-		# ax.plot([limval, limval], ylims, color='red')
-		# ax.plot([cost_per_member.max(), cost_per_member.max()], ylims, 'r:' )
 
 		toomuch = cost_per_member[cost_per_member > limval]
 		scoring_entities = toomuch.index
@@ -135,13 +123,13 @@ def cost_per_member(data, params, hitlist, outdata, grouping='Prov_specialism'):
 	hitlist = hitlist.append(hl_add, sort=True)
 
 		
-	return hitlist, outdata
+	return hitlist
 
 
 
 ######################################################################
 
-def billing_pattern(data, params, hitlist, outdata):
+def billing_pattern(data, params, hitlist):
 	"""
 	In this model, outliers from the general billing pattern (see below) are flagged,
 	based on how far away from the nearest cluster they are.
@@ -206,12 +194,6 @@ def billing_pattern(data, params, hitlist, outdata):
 		score.append(np.sqrt(np.min(distsq)) / (3*center[np.argmin(distsq), 3]))
 		money.append(0)    
 
-	# Definitions outdata
-	outdata['billing'] = {'x':list(pcas[:,0]), 
-						'y':list(pcas[:,1]), 
-						'z':list(pcas[:,2]), 
-						'Provider_ID':list(piv_proc.index), 
-						'color':list(labels)}
 
 	hl_add = pd.DataFrame({'Provider_ID':outliers, 'Score':score, 'Monetary':money, 
 		'Model': ['Billing pattern']*len(score), 'Weight':[params['Weight']]*len(score)})
@@ -220,14 +202,14 @@ def billing_pattern(data, params, hitlist, outdata):
 
 
 
-	return hitlist, outdata
+	return hitlist
 
 
 
 
 ######################################################################
 
-def weekends_holidays(data, params, hitlist, outdata):
+def weekends_holidays(data, params, hitlist):
 	"""
 	Treatments on weekends and holidays are flagged. There is one parameter to rule this model:
 	the choice to flag everybody who did so, or to flag people who do so significantly more often than others.
@@ -277,14 +259,14 @@ def weekends_holidays(data, params, hitlist, outdata):
 	hitlist = hitlist.append(hl_add, sort=True)
 
 
-	return hitlist, outdata
+	return hitlist
 
 
 
 
 ######################################################################
 
-def rising_revenue(data, params, hitlist, outdata):
+def rising_revenue(data, params, hitlist):
 	"""
 	This detection model checks if there are any signs of significantly rising activity/revenue, 
 	throughout the period of activity. Both gradually rising, as well as step functions in activity
@@ -323,27 +305,18 @@ def rising_revenue(data, params, hitlist, outdata):
 	maxstd = 2
 	stds = stds[stds.values > maxstd] - maxstd
 
-	# Definition outdata
-	outdata['increasing_revenue'] = {}
-	outdata['increasing_revenue']['Provider_ID'] = list(stds.index)
-	outdata['increasing_revenue']['Values'] = []
-	outdata['increasing_revenue']['Months'] = []
-	for prov in stds.index: 
-		outdata['increasing_revenue']['Months'].append(list(revpermonth[prov].index))
-		outdata['increasing_revenue']['Values'].append(list(revpermonth[prov].values))
-
 	hl_add = pd.DataFrame({'Provider_ID':stds.index, 'Score':stds.values, 'Monetary':[0]*len(stds), 
 		'Model': ['Rising revenue']*len(stds), 'Weight':[params['Weight']]*len(stds)})
 
 	hitlist = hitlist.append(hl_add, sort=True)
 
 
-	return hitlist, outdata
+	return hitlist
 
 
 ######################################################################
 
-def seasonality(data, params, hitlist, outdata):
+def seasonality(data, params, hitlist):
 	"""
 	In summer, patients go on holidays, so there is a trend that fewer patients are treated in July and August,
 	which is (partly) made up by them showing up in September and/or October. This trend is visible in the 
@@ -379,28 +352,18 @@ def seasonality(data, params, hitlist, outdata):
 	scores = abs(allnumbers.groupby('Provider_ID').deviation.mean()) - 1
 	scores = scores[scores.values > 0]
 		
-	outdata['seasonality'] = {}
-	outdata['seasonality']['Provider_ID'] = list(scores.index)
-	outdata['seasonality']['Values'] = []
-	outdata['seasonality']['Months'] = []
-	for prov in scores.index: 
-		outdata['seasonality']['Months'].append(list(allnumbers[allnumbers.Provider_ID == prov].qmonth))
-		outdata['seasonality']['Values'].append(list(100*allnumbers[allnumbers.Provider_ID == prov].fracprov))
-	outdata['seasonality']['Month_names'] = ['Jan-Feb','Mar-Apr','May-Jun','Jul-Aug','Sep-Oct','Nov-Dec']
-	outdata['seasonality']['Entire_population'] = 100*fracs.Paid_amt
-
 	hl_add = pd.DataFrame({'Provider_ID':scores.index, 'Score':scores.values, 'Monetary':[0]*len(scores), 
 		'Model': ['Seasonality']*len(scores), 'Weight':[params['Weight']]*len(scores)})
 
 	hitlist = hitlist.append(hl_add, sort=True)
 
 
-	return hitlist, outdata
+	return hitlist
 
 
 ######################################################################
 
-def combination_codes(data, params, hitlist, outdata):
+def combination_codes(data, params, hitlist):
 	""" Codes I1 and H1 should not appear together 
 	"""
 
@@ -430,13 +393,13 @@ def combination_codes(data, params, hitlist, outdata):
 	hitlist = hitlist.append(hl_add, sort=True)
 
 
-	return hitlist, outdata
+	return hitlist
 
 
 
 ######################################################################
 
-def fraction_expensive(data, params, hitlist, outdata):
+def fraction_expensive(data, params, hitlist):
 	""" An outlier detection is performed on the fraction of expensive versus cheap
 	versions of the same procedure (encoded as A1 vs A2, for example).
 	User specified options are:
@@ -503,13 +466,13 @@ def fraction_expensive(data, params, hitlist, outdata):
 
 		hitlist = hitlist.append(hl_add, sort=True)
 
-	return hitlist, outdata
+	return hitlist
 
 
 ######################################################################
 
 
-def freely_billed(data, params, hitlist, outdata):
+def freely_billed(data, params, hitlist):
 	""" An outlier detection is performed on billed rate per freely billable procedure.
 	User specified options are:
 	- determined per specialism or overall 
@@ -566,13 +529,13 @@ def freely_billed(data, params, hitlist, outdata):
 
 			hitlist = hitlist.append(hl_add, sort=True)
 
-	return hitlist, outdata
+	return hitlist
 
 
 ######################################################################
 
 
-def periodic_often(data, params, hitlist, outdata):
+def periodic_often(data, params, hitlist):
 	""" Periodic treatments (code BX) should be done once or twice a year. 
 	Catch providers who have done more than that to some patients. 
 	"""
@@ -601,8 +564,8 @@ def periodic_often(data, params, hitlist, outdata):
 
 	hitlist = hitlist.append(hl_add, sort=True)
 
-	return hitlist, outdata
+	return hitlist
 
 
 if __name__ == "__main__":
-	print("No tests implemented yet.")
+	print("No tests implemented.")
